@@ -20,6 +20,7 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
   const [squares, setSquares] = useState<SquareRow[]>(initialSquares)
   const [gameState, setGameState] = useState<GameStateRow | null>(initialGameState)
   const [selectedSquare, setSelectedSquare] = useState<SquareRow | null>(null)
+  const [isZoomedOut, setIsZoomedOut] = useState(false)
   
   const supabase = createClient()
 
@@ -107,10 +108,26 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
         </p>
       </div>
 
-      <div className="overflow-x-auto pb-4 scrollbar-hide">
-        <div className="flex min-w-[800px]">
+      {/* View Controls */}
+      <div className="flex justify-end mb-4 sm:hidden">
+        <button 
+          onClick={() => setIsZoomedOut(!isZoomedOut)}
+          className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-white shadow-xl flex items-center gap-2"
+        >
+          {isZoomedOut ? "🔍 Zoom In" : "🌐 View Full Board"}
+        </button>
+      </div>
+
+      <div className={cn(
+        "pb-4 scrollbar-hide transition-all duration-500",
+        isZoomedOut ? "w-full overflow-hidden" : "overflow-x-auto"
+      )}>
+        <div className={cn(
+          "flex transition-all duration-500 origin-top-left",
+          isZoomedOut ? "min-w-0" : "min-w-[800px]"
+        )}>
           {/* Team Header (Side) - Seahawks */}
-          <div className="flex flex-col justify-center items-center mr-2 sm:mr-6">
+          <div className="flex flex-col justify-center items-center mr-2 sm:mr-6 sticky left-0 z-30 bg-transparent backdrop-blur-sm rounded-r-xl pr-2">
             <div className="h-full flex items-center">
               <h2 className="-rotate-180 text-xl sm:text-3xl font-black text-white uppercase tracking-widest drop-shadow-[0_2px_10px_rgba(0,0,0,0.3)] whitespace-nowrap" style={{ writingMode: 'vertical-rl' }}>
                 <span className="bg-gradient-to-b from-[#69BE28] via-white to-[#002244] bg-clip-text text-transparent">
@@ -124,7 +141,7 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
           <div className="grid grid-cols-[auto_1fr] gap-2 sm:gap-3 flex-1">
             
             {/* Top Left Corner (Empty/Logo) */}
-            <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center text-white/20 font-bold text-sm sm:text-xl">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center text-white/20 font-bold text-sm sm:text-xl sticky left-0 z-40 bg-transparent backdrop-blur-md rounded-tl-lg border border-white/10">
               🏈
             </div>
 
@@ -141,7 +158,7 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
             </div>
 
             {/* Side Headers (Rows) */}
-            <div className="grid grid-rows-10 gap-1 sm:gap-1.5">
+            <div className="grid grid-rows-10 gap-1 sm:gap-1.5 sticky left-0 z-20">
               {rowHeaders.map((num, i) => (
                 <div 
                   key={`row-${i}`} 
@@ -178,6 +195,7 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
                       colDigit={colHeaders[y]}
                       onClick={setSelectedSquare} 
                       disabled={gameState?.is_locked}
+                      isMini={isZoomedOut}
                       wins={squareWins}
                     />
                   )

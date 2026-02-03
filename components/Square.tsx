@@ -1,7 +1,7 @@
 "use client"
 
 import { Database } from "@/types/database.types"
-import { cn } from "@/utils/cn" // Need to create this utils helper first or inline it. I'll inline for now or create utils/cn.ts
+import { cn } from "@/utils/cn"
 
 type SquareRow = Database['public']['Tables']['squares']['Row']
 
@@ -17,10 +17,11 @@ interface SquareProps {
   colDigit: number | string
   onClick: (square: SquareRow) => void
   disabled?: boolean
+  isMini?: boolean
   wins?: WinStatus[]
 }
 
-export function Square({ square, rowDigit, colDigit, onClick, disabled, wins = [] }: SquareProps) {
+export function Square({ square, rowDigit, colDigit, onClick, disabled, isMini, wins = [] }: SquareProps) {
   const isTaken = !!square.user_name
 
   // Mapping for explicit labels as requested
@@ -66,7 +67,7 @@ export function Square({ square, rowDigit, colDigit, onClick, disabled, wins = [
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
 
       {/* Explicit Win Labels */}
-      {wins.length > 0 && (
+      {wins.length > 0 && !isMini && (
         <div className="absolute top-0.5 right-0.5 flex flex-col gap-0.5 z-20 items-end">
           {wins.map((w, i) => (
             <div 
@@ -88,12 +89,18 @@ export function Square({ square, rowDigit, colDigit, onClick, disabled, wins = [
 
       {isTaken ? (
         <div className="flex flex-col items-center justify-center w-full h-full overflow-hidden z-0 px-1">
-          <span className="truncate w-full text-center text-[10px] sm:text-xs font-black tracking-tight text-white/90">
+          <span className={cn(
+            "truncate w-full text-center font-black tracking-tight text-white/90",
+            isMini ? "text-[6px]" : "text-[10px] sm:text-xs"
+          )}>
             {square.user_name}
           </span>
         </div>
       ) : (
-        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-sm text-white/40 font-black">
+        <span className={cn(
+          "opacity-0 group-hover:opacity-100 transition-opacity font-black",
+          isMini ? "text-[8px]" : "text-sm text-white/40"
+        )}>
           +
         </span>
       )}
