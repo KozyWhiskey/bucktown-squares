@@ -108,7 +108,7 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
       </div>
 
       <div className="overflow-x-auto pb-4 scrollbar-hide">
-        <div className="flex min-w-[900px]">
+        <div className="flex min-w-[800px]">
           {/* Team Header (Side) - Seahawks */}
           <div className="flex flex-col justify-center items-center mr-2 sm:mr-6">
             <div className="h-full flex items-center">
@@ -174,6 +174,8 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
                     <Square 
                       key={square.id} 
                       square={square} 
+                      rowDigit={rowHeaders[x]}
+                      colDigit={colHeaders[y]}
                       onClick={setSelectedSquare} 
                       disabled={gameState?.is_locked}
                       wins={squareWins}
@@ -248,6 +250,8 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
       {selectedSquare && (
         <ClaimModal
           square={selectedSquare}
+          rowDigit={rowHeaders[selectedSquare.x]}
+          colDigit={colHeaders[selectedSquare.y]}
           onClose={() => setSelectedSquare(null)}
           onClaim={handleClaim}
         />

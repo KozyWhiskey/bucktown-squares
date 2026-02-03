@@ -8,11 +8,13 @@ type SquareRow = Database['public']['Tables']['squares']['Row']
 
 interface ClaimModalProps {
   square: SquareRow
+  rowDigit: number | string
+  colDigit: number | string
   onClose: () => void
   onClaim: (id: string, name: string, email: string) => Promise<void>
 }
 
-export function ClaimModal({ square, onClose, onClaim }: ClaimModalProps) {
+export function ClaimModal({ square, rowDigit, colDigit, onClose, onClaim }: ClaimModalProps) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
@@ -48,8 +50,8 @@ export function ClaimModal({ square, onClose, onClaim }: ClaimModalProps) {
             🏈
           </div>
           <h2 className="text-2xl font-black mb-2 tracking-tight">Square Taken</h2>
-          <p className="text-white/40 text-sm font-medium mb-8 uppercase tracking-widest">
-            Row {square.x} • Column {square.y}
+          <p className="text-blue-300 font-black mb-8 uppercase tracking-widest">
+            NE - {colDigit} • SEA - {rowDigit}
           </p>
 
           <div className="p-6 glass rounded-2xl border border-white/10 mb-8">
@@ -73,8 +75,8 @@ export function ClaimModal({ square, onClose, onClaim }: ClaimModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
       <div className="w-full max-w-md glass-card p-8 rounded-3xl shadow-2xl text-white transform transition-all animate-in fade-in zoom-in-95 duration-300">
         <h2 className="text-3xl font-black mb-2 tracking-tight">Claim Square</h2>
-        <p className="text-white/40 text-sm font-medium mb-8 uppercase tracking-widest">
-          Row {square.x}, Column {square.y}
+        <p className="text-blue-300 font-black mb-8 uppercase tracking-widest">
+          NE - {colDigit} • SEA - {rowDigit}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">

@@ -13,7 +13,7 @@ export function Rules() {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-white/5 transition-colors focus:outline-none"
       >
-        <h2 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
+        <h2 className="text-1xl sm:text-2xl font-black text-white flex items-center gap-3">
           <span className="p-1 bg-white/10 rounded-xl">📜</span> Rules & Payouts
         </h2>
         {isOpen ? (

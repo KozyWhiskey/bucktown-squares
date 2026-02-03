@@ -13,14 +13,14 @@ export interface WinStatus {
 
 interface SquareProps {
   square: SquareRow
-  rowNumbers?: number[] | null
-  colNumbers?: number[] | null
+  rowDigit: number | string
+  colDigit: number | string
   onClick: (square: SquareRow) => void
   disabled?: boolean
   wins?: WinStatus[]
 }
 
-export function Square({ square, onClick, disabled, wins = [] }: SquareProps) {
+export function Square({ square, rowDigit, colDigit, onClick, disabled, wins = [] }: SquareProps) {
   const isTaken = !!square.user_name
 
   // Mapping for explicit labels as requested
@@ -102,6 +102,9 @@ export function Square({ square, onClick, disabled, wins = [] }: SquareProps) {
       {isTaken && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 glass-card text-white text-xs rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 transform group-hover:-translate-y-1">
           <div className="font-black mb-1 tracking-tight">{square.user_name}</div>
+          <div className="text-[10px] text-blue-300/60 uppercase font-black tracking-widest mb-2">
+            NE - {colDigit} • SEA - {rowDigit}
+          </div>
           {wins.length > 0 && (
             <div className="text-[10px] text-white/60 border-t border-white/10 pt-2 mt-2 space-y-1">
               {wins.map((w, i) => (
