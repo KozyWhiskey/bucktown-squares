@@ -88,12 +88,12 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
   const getWinner = (homeScore: number | string, awayScore: number | string) => {
     if (homeScore === "" || awayScore === "" || !gameState?.col_numbers || !gameState?.row_numbers) return null
     
-    // Home = New England (Cols/Top), Away = Seahawks (Rows/Side)
+    // Home = Patriots (Cols/Top), Away = Seahawks (Rows/Side)
     const homeDigit = Number(homeScore) % 10
     const awayDigit = Number(awayScore) % 10
 
     // Find indices
-    // Home = New England (Cols/Top) -> Matches y in Grid
+    // Home = Patriots (Cols/Top) -> Matches y in Grid
     // Away = Seahawks (Rows/Side) -> Matches x in Grid
     
     const colIndex = gameState.col_numbers.indexOf(homeDigit)
@@ -140,7 +140,7 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
              {gameState?.is_locked && (
                <div className="mt-4 grid grid-cols-2 gap-4">
                  <div className="bg-black/40 p-2 rounded">
-                   <span className="text-xs text-white/50 block">NE (Cols)</span>
+                   <span className="text-xs text-white/50 block">PAT (Cols)</span>
                    <span className="font-mono">{gameState.col_numbers?.join(", ")}</span>
                  </div>
                  <div className="bg-black/40 p-2 rounded">
@@ -153,7 +153,7 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
 
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-white/50 mb-2 uppercase flex justify-between">
-              <span>Scores (NE vs SEA)</span>
+              <span>Scores (PAT vs SEA)</span>
               <button onClick={handleScoreUpdate} disabled={isPending} className="text-blue-400 hover:text-blue-300 text-xs">Save Updates</button>
             </h3>
             

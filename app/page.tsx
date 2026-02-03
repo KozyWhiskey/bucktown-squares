@@ -21,9 +21,9 @@ export default async function Home() {
     .single()
 
   return (
-    <main className="min-h-screen bg-aurora flex flex-col items-center py-10 sm:py-20 px-4">
-      <div className="text-center mb-8 sm:mb-12 space-y-4">
-        <h1 className="text-3xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-indigo-200 to-pink-200 drop-shadow-sm tracking-tight">
+    <main className="flex flex-col items-center py-10 sm:py-20 px-4">
+      <div className="text-center mb-12 sm:mb-20 space-y-4">
+        <h1 className="text-5xl sm:text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-indigo-200 to-pink-200 drop-shadow-sm tracking-tighter">
           Super Bowl Squares
         </h1>
       </div>

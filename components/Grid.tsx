@@ -94,24 +94,26 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
   }
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto p-2 sm:p-4">
-      {/* Team Header (Top) - New England */}
+    <div className="relative w-full max-w-7xl mx-auto p-2 sm:p-4">
+      {/* Team Header (Top) - Patriots */}
       <div className="mb-4 text-center">
-        <h2 className="text-xl sm:text-3xl font-black text-white uppercase tracking-widest drop-shadow-[0_2px_10px_rgba(0,0,0,0.3)] bg-gradient-to-r from-blue-100 via-white to-blue-100 bg-clip-text text-transparent">
-          New England
+        <h2 className="text-xl sm:text-3xl font-black uppercase tracking-widest drop-shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+          <span className="bg-gradient-to-r from-[#002244] via-white to-[#C60C30] bg-clip-text text-transparent">
+            Patriots
+          </span>
         </h2>
         <p className="text-[10px] sm:text-sm text-blue-200/60 font-medium tracking-wide uppercase mt-1">
           (Last Digit of Score)
         </p>
       </div>
 
-      <div className="overflow-x-auto pb-4">
-        <div className="flex min-w-[600px]">
+      <div className="overflow-x-auto pb-4 scrollbar-hide">
+        <div className="flex min-w-[900px]">
           {/* Team Header (Side) - Seahawks */}
-          <div className="flex flex-col justify-center items-center mr-1 sm:mr-4">
+          <div className="flex flex-col justify-center items-center mr-2 sm:mr-6">
             <div className="h-full flex items-center">
               <h2 className="-rotate-180 text-xl sm:text-3xl font-black text-white uppercase tracking-widest drop-shadow-[0_2px_10px_rgba(0,0,0,0.3)] whitespace-nowrap" style={{ writingMode: 'vertical-rl' }}>
-                <span className="bg-gradient-to-b from-green-100 via-white to-blue-100 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-b from-[#69BE28] via-white to-[#002244] bg-clip-text text-transparent">
                   Seahawks
                 </span>
               </h2>
@@ -119,19 +121,19 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
           </div>
 
           {/* Container for the grid with headers */}
-          <div className="grid grid-cols-[auto_1fr] gap-2 sm:gap-4 flex-1">
+          <div className="grid grid-cols-[auto_1fr] gap-2 sm:gap-3 flex-1">
             
             {/* Top Left Corner (Empty/Logo) */}
-            <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center text-white/20 font-bold text-xs sm:text-lg">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center text-white/20 font-bold text-sm sm:text-xl">
               🏈
             </div>
 
             {/* Top Headers (Columns) */}
-            <div className="grid grid-cols-10 gap-px sm:gap-1">
+            <div className="grid grid-cols-10 gap-1 sm:gap-1.5">
               {colHeaders.map((num, i) => (
                 <div 
                   key={`col-${i}`} 
-                  className="aspect-square flex items-center justify-center text-xs sm:text-xl font-bold bg-black/40 text-white/70 rounded-t-sm backdrop-blur-sm"
+                  className="aspect-square flex items-center justify-center text-sm sm:text-2xl font-black bg-slate-900/80 backdrop-blur-md border border-white/10 text-white/90 rounded-t-lg shadow-sm"
                 >
                   {num}
                 </div>
@@ -139,11 +141,11 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
             </div>
 
             {/* Side Headers (Rows) */}
-            <div className="grid grid-rows-10 gap-px sm:gap-1">
+            <div className="grid grid-rows-10 gap-1 sm:gap-1.5">
               {rowHeaders.map((num, i) => (
                 <div 
                   key={`row-${i}`} 
-                  className="aspect-square flex items-center justify-center text-xs sm:text-xl font-bold bg-black/40 text-white/70 rounded-l-sm backdrop-blur-sm"
+                  className="aspect-square flex items-center justify-center text-sm sm:text-2xl font-black bg-slate-900/80 backdrop-blur-md border border-white/10 text-white/90 rounded-l-lg shadow-sm"
                 >
                   {num}
                 </div>
@@ -151,11 +153,11 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
             </div>
 
             {/* The Grid */}
-            <div className="grid grid-cols-10 grid-rows-10 gap-px sm:gap-1 bg-black/30 border border-white/10 rounded-br-lg p-px sm:p-1 backdrop-blur-sm shadow-2xl">
+            <div className="grid grid-cols-10 grid-rows-10 gap-1 sm:gap-1.5 glass-card bg-black/60 rounded-br-2xl p-1 sm:p-2 shadow-2xl overflow-hidden">
               {Array.from({ length: 10 }).map((_, x) => 
                 Array.from({ length: 10 }).map((_, y) => {
                   const square = getSquare(x, y)
-                  if (!square) return <div key={`${x}-${y}`} className="bg-red-500/20" /> 
+                  if (!square) return <div key={`${x}-${y}`} className="bg-red-500/10" /> 
                   
                   // Check if this square is a winner
                   const squareWins: WinStatus[] = []
@@ -185,11 +187,11 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
       </div>
 
       {/* Winners List Section */}
-      <div className="mt-12 w-full">
-         <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-           <span>🏆</span> Winners Board
+      <div className="mt-16 w-full">
+         <h3 className="text-3xl font-black text-white mb-8 flex items-center gap-3 tracking-tighter">
+           <span className="p-2 bg-white/10 rounded-xl">🏆</span> Winners Board
          </h3>
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {[
               { id: 'q1', title: '1st Quarter', color: 'purple' },
               { id: 'half', title: 'Halftime', color: 'blue' },
@@ -202,38 +204,38 @@ export function Grid({ initialSquares, initialGameState }: GridProps) {
                const hasWinner = !!win.square
                
                return (
-                 <div key={q.id} className={cn("bg-white/5 border rounded-xl overflow-hidden", `border-${q.color}-500/30`)}>
-                    <div className={cn("p-2 text-center font-bold text-sm uppercase text-white/80", `bg-${q.color}-500/20`)}>
+                 <div key={q.id} className={cn("glass-card rounded-2xl overflow-hidden transition-all hover:scale-[1.02]", `border-${q.color}-500/20`)}>
+                    <div className={cn("p-3 text-center font-black text-xs uppercase tracking-widest text-white/90", `bg-${q.color}-500/20`)}>
                       {q.title}
                     </div>
-                    <div className="p-4 space-y-4">
+                    <div className="p-5 space-y-5">
                       {/* Standard Winner */}
                       <div>
-                        <div className="flex justify-between text-xs text-white/40 mb-1">
+                        <div className="flex justify-between text-xs uppercase font-bold tracking-wider text-white/40 mb-2">
                           <span>Winner</span>
-                          <span className={cn(`text-${q.color}-300`)}>{win.payout}</span>
+                          <span className={cn(`text-${q.color}-400`, "font-black")}>{win.payout}</span>
                         </div>
                         {hasWinner ? (
-                          <div className="font-bold text-white text-lg truncate">
+                          <div className="font-black text-white text-2xl truncate tracking-tight">
                             {win.square?.user_name || "Unclaimed"}
                           </div>
                         ) : (
-                          <div className="text-white/20 text-sm italic">Waiting...</div>
+                          <div className="text-white/10 text-base font-medium italic">Waiting...</div>
                         )}
                       </div>
                       
                       {/* Reverse Winner */}
-                      <div className="pt-3 border-t border-white/10">
-                        <div className="flex justify-between text-xs text-white/40 mb-1">
+                      <div className="pt-4 border-t border-white/5">
+                        <div className="flex justify-between text-xs uppercase font-bold tracking-wider text-white/40 mb-2">
                           <span>Reverse</span>
-                          <span className="text-pink-300">{rev.payout}</span>
+                          <span className="text-pink-400 font-black">{rev.payout}</span>
                         </div>
                          {hasWinner ? (
-                          <div className="font-medium text-white/80 truncate">
+                          <div className="font-black text-white/80 text-lg truncate tracking-tight">
                             {rev.square?.user_name || "Unclaimed"}
                           </div>
                         ) : (
-                          <div className="text-white/20 text-sm italic">Waiting...</div>
+                          <div className="text-white/10 text-sm font-medium italic">Waiting...</div>
                         )}
                       </div>
                     </div>
