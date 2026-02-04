@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useMemo } from "react"
 import { Database } from "@/types/database.types"
 import { togglePaid, generateNumbers, updateGameState, resetGame, removePlayer } from "@/app/actions"
-import { Loader2, Check, X, Lock, Trophy, RotateCcw, Trash2 } from "lucide-react"
-import { cn } from "@/utils/cn"
+import { Check, X, Lock, Trophy, RotateCcw, Trash2, ArrowUpDown, ChevronUp, ChevronDown, Search, Filter } from "lucide-react"
 
 type SquareRow = Database['public']['Tables']['squares']['Row']
 type GameStateRow = Database['public']['Tables']['game_state']['Row']
@@ -19,6 +18,12 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
   const [password, setPassword] = useState("")
   const [isPending, startTransition] = useTransition()
 
+  // Sorting and Filtering State
+  const [sortField, setSortField] = useState<string>('user_name')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterPaid, setFilterPaid] = useState<'all' | 'paid' | 'unpaid'>('all')
+
   // Local state for scores to handle input before blur/save
   const [scores, setScores] = useState({
     q1_home: gameState?.q1_home ?? "", q1_away: gameState?.q1_away ?? "",
@@ -26,6 +31,32 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
     q3_home: gameState?.q3_home ?? "", q3_away: gameState?.q3_away ?? "",
     final_home: gameState?.final_home ?? "", final_away: gameState?.final_away ?? "",
   })
+
+  const filteredAndSortedSquares = useMemo(() => {
+    return squares
+      .filter(s => s.user_name)
+      .filter(s => {
+        const searchMatch = (s.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             s.user_email?.toLowerCase().includes(searchTerm.toLowerCase()))
+        const paidMatch = filterPaid === 'all' || 
+                          (filterPaid === 'paid' && s.paid) || 
+                          (filterPaid === 'unpaid' && !s.paid)
+        return searchMatch && paidMatch
+      })
+      .sort((a, b) => {
+        let comparison = 0
+        if (sortField === 'loc') {
+          comparison = a.x !== b.x ? a.x - b.x : a.y - b.y
+        } else if (sortField === 'paid') {
+          comparison = (a.paid === b.paid) ? 0 : a.paid ? 1 : -1
+        } else {
+          const valA = String(a[sortField as keyof SquareRow] ?? "")
+          const valB = String(b[sortField as keyof SquareRow] ?? "")
+          comparison = valA.localeCompare(valB)
+        }
+        return sortDirection === 'asc' ? comparison : -comparison
+      })
+  }, [squares, searchTerm, filterPaid, sortField, sortDirection])
 
   if (!isAuthenticated) {
     return (
@@ -84,6 +115,15 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
     })
   }
 
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
   // Winning Logic Helper
   const getWinner = (homeScore: number | string, awayScore: number | string) => {
     if (homeScore === "" || awayScore === "" || !gameState?.col_numbers || !gameState?.row_numbers) return null
@@ -104,10 +144,10 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
     return squares.find(s => s.x === rowIndex && s.y === colIndex)
   }
 
-  const q1Winner = getWinner(scores.q1_home, scores.q1_away)
-  const halfWinner = getWinner(scores.q2_home, scores.q2_away)
-  const q3Winner = getWinner(scores.q3_home, scores.q3_away)
-  const finalWinner = getWinner(scores.final_home, scores.final_away)
+  const renderSortIcon = (field: string) => {
+    if (sortField !== field) return <ArrowUpDown className="w-3 h-3 opacity-30" />
+    return sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-blue-400" /> : <ChevronDown className="w-3 h-3 text-blue-400" />
+  }
 
   return (
     <div className="space-y-8">
@@ -218,14 +258,43 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
 
       {/* Player Management Section */}
       <section className="bg-white/5 border border-white/10 rounded-xl p-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <span>👥</span> Player Management
           </h2>
-          <div className="text-sm text-white/50">
+          <div className="text-sm text-white/50 bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
             Total Taken: <span className="text-white">{squares.filter(s => s.user_name).length}/100</span>
             <span className="mx-2">•</span>
             Paid: <span className="text-green-400">{squares.filter(s => s.paid).length}</span>
+          </div>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <input 
+              type="text" 
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full bg-black/40 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-white/30" />
+            <select 
+              value={filterPaid}
+              onChange={e => setFilterPaid(e.target.value as 'all' | 'paid' | 'unpaid')}
+              className="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500/50 transition-colors flex-1"
+            >
+              <option value="all">All Statuses</option>
+              <option value="paid">Paid Only</option>
+              <option value="unpaid">Unpaid Only</option>
+            </select>
+          </div>
+          <div className="flex justify-end items-center text-xs text-white/30 italic">
+            Showing {filteredAndSortedSquares.length} players
           </div>
         </div>
 
@@ -233,15 +302,23 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
           <table className="w-full text-left text-sm">
             <thead className="bg-white/5 text-white/50 uppercase text-xs">
               <tr>
-                <th className="p-3">Loc</th>
-                <th className="p-3">Name</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">Status</th>
+                <th className="p-3 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('loc')}>
+                  <div className="flex items-center gap-2">Loc {renderSortIcon('loc')}</div>
+                </th>
+                <th className="p-3 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('user_name')}>
+                  <div className="flex items-center gap-2">Name {renderSortIcon('user_name')}</div>
+                </th>
+                <th className="p-3 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('user_email')}>
+                  <div className="flex items-center gap-2">Email {renderSortIcon('user_email')}</div>
+                </th>
+                <th className="p-3 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('paid')}>
+                  <div className="flex items-center gap-2">Status {renderSortIcon('paid')}</div>
+                </th>
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
-              {squares.filter(s => s.user_name).map((square) => (
+              {filteredAndSortedSquares.map((square) => (
                 <tr key={square.id} className="hover:bg-white/5 transition-colors">
                   <td className="p-3 font-mono text-white/50">
                     ({square.x}, {square.y})
@@ -285,9 +362,11 @@ export function AdminDashboard({ squares, gameState }: AdminDashboardProps) {
                   </td>
                 </tr>
               ))}
-              {squares.filter(s => s.user_name).length === 0 && (
+              {filteredAndSortedSquares.length === 0 && (
                  <tr>
-                   <td colSpan={5} className="p-8 text-center text-white/30">No squares claimed yet.</td>
+                   <td colSpan={5} className="p-8 text-center text-white/30">
+                     {squares.filter(s => s.user_name).length === 0 ? "No squares claimed yet." : "No players match your filters."}
+                   </td>
                  </tr>
               )}
             </tbody>

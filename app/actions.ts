@@ -2,12 +2,15 @@
 
 import { createClient, createAdminClient } from "@/utils/supabase/server"
 import { revalidatePath } from "next/cache"
+import { Database } from "@/types/database.types"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SquareUpdate = Database['public']['Tables']['squares']['Update']
+type GameStateUpdate = Database['public']['Tables']['game_state']['Update']
+
 export async function claimSquare(id: string, name: string, email: string) {
-  const supabase = await createClient() as any
+  const supabase = await createClient()
 
-  // Verify it's empty first (Double check security, though RLS handles this too)
+  // Verify it's empty first
   const { data: square } = await supabase
     .from("squares")
     .select("*")
@@ -20,9 +23,9 @@ export async function claimSquare(id: string, name: string, email: string) {
 
   const { error } = await supabase
     .from("squares")
-    .update({ user_name: name, user_email: email })
+    .update({ user_name: name, user_email: email } as SquareUpdate)
     .eq("id", id)
-    .is("user_name", null) // Extra safety: ensuring we only update if null
+    .is("user_name", null)
 
   if (error) {
     throw new Error(error.message)
@@ -31,15 +34,12 @@ export async function claimSquare(id: string, name: string, email: string) {
   revalidatePath("/")
 }
 
-// Admin Actions
-// NOTE: In a real app, add authentication checks here (e.g., check session role)
-
 export async function removePlayer(id: string) {
   const supabase = await createAdminClient()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("squares") as any)
-    .update({ user_name: null, user_email: null, paid: false })
+  const { error } = await supabase
+    .from("squares")
+    .update({ user_name: null, user_email: null, paid: false } as SquareUpdate)
     .eq("id", id)
 
   if (error) throw new Error(error.message)
@@ -50,9 +50,9 @@ export async function removePlayer(id: string) {
 export async function togglePaid(id: string, currentStatus: boolean) {
   const supabase = await createAdminClient()
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("squares") as any)
-    .update({ paid: !currentStatus })
+  const { error } = await supabase
+    .from("squares")
+    .update({ paid: !currentStatus } as SquareUpdate)
     .eq("id", id)
 
   if (error) throw new Error(error.message)
@@ -62,19 +62,16 @@ export async function togglePaid(id: string, currentStatus: boolean) {
 export async function generateNumbers() {
   const supabase = await createAdminClient()
 
-  // Generate random 0-9 arrays
-  const shuffle = (arr: number[]) => arr.sort(() => Math.random() - 0.5)
+  const shuffle = (arr: number[]) => [...arr].sort(() => Math.random() - 0.5)
   const rows = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
   const cols = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
-  // Get the single game state row ID (assuming only 1 exists)
   const { data: states } = await supabase.from("game_state").select("id").limit(1)
   if (!states || states.length === 0) throw new Error("No game state found")
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("game_state") as any)
-    .update({ row_numbers: rows, col_numbers: cols, is_locked: true })
-    // @ts-ignore
+  const { error } = await supabase
+    .from("game_state")
+    .update({ row_numbers: rows, col_numbers: cols, is_locked: true } as GameStateUpdate)
     .eq("id", states[0].id)
 
   if (error) throw new Error(error.message)
@@ -87,8 +84,8 @@ export async function resetGame() {
   const { data: states } = await supabase.from("game_state").select("id").limit(1)
   if (!states || states.length === 0) throw new Error("No game state found")
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("game_state") as any)
+  const { error } = await supabase
+    .from("game_state")
     .update({ 
       row_numbers: null, 
       col_numbers: null, 
@@ -97,25 +94,22 @@ export async function resetGame() {
       q2_home: null, q2_away: null,
       q3_home: null, q3_away: null,
       final_home: null, final_away: null
-    })
-    // @ts-ignore
+    } as GameStateUpdate)
     .eq("id", states[0].id)
 
   if (error) throw new Error(error.message)
   revalidatePath("/")
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateGameState(newState: any) {
+export async function updateGameState(newState: GameStateUpdate) {
   const supabase = await createAdminClient()
   
   const { data: states } = await supabase.from("game_state").select("id").limit(1)
   if (!states || states.length === 0) throw new Error("No game state found")
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("game_state") as any)
+  const { error } = await supabase
+    .from("game_state")
     .update(newState)
-    // @ts-ignore
     .eq("id", states[0].id)
 
   if (error) throw new Error(error.message)
