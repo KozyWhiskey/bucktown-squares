@@ -5,24 +5,28 @@ import { revalidatePath } from "next/cache"
 import { Database } from "@/types/database.types"
 
 type SquareUpdate = Database['public']['Tables']['squares']['Update']
+type SquareRow = Database['public']['Tables']['squares']['Row']
 type GameStateUpdate = Database['public']['Tables']['game_state']['Update']
+type GameStateRow = Database['public']['Tables']['game_state']['Row']
 
 export async function claimSquare(id: string, name: string, email: string) {
   const supabase = await createClient()
 
   // Verify it's empty first
-  const { data: square } = await supabase
+  const { data } = await supabase
     .from("squares")
-    .select("*")
+    .select()
     .eq("id", id)
     .single()
+
+  const square = data as SquareRow | null
 
   if (square?.user_name) {
     throw new Error("Square already taken")
   }
 
-  const { error } = await supabase
-    .from("squares")
+  const { error } = await (supabase
+    .from("squares") as any)
     .update({ user_name: name, user_email: email } as SquareUpdate)
     .eq("id", id)
     .is("user_name", null)
@@ -37,8 +41,8 @@ export async function claimSquare(id: string, name: string, email: string) {
 export async function removePlayer(id: string) {
   const supabase = await createAdminClient()
 
-  const { error } = await supabase
-    .from("squares")
+  const { error } = await (supabase
+    .from("squares") as any)
     .update({ user_name: null, user_email: null, paid: false } as SquareUpdate)
     .eq("id", id)
 
@@ -50,8 +54,8 @@ export async function removePlayer(id: string) {
 export async function togglePaid(id: string, currentStatus: boolean) {
   const supabase = await createAdminClient()
   
-  const { error } = await supabase
-    .from("squares")
+  const { error } = await (supabase
+    .from("squares") as any)
     .update({ paid: !currentStatus } as SquareUpdate)
     .eq("id", id)
 
@@ -66,11 +70,13 @@ export async function generateNumbers() {
   const rows = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
   const cols = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
-  const { data: states } = await supabase.from("game_state").select("id").limit(1)
+  const { data } = await supabase.from("game_state").select("id").limit(1)
+  const states = data as { id: string }[] | null // Only selecting ID here
+
   if (!states || states.length === 0) throw new Error("No game state found")
   
-  const { error } = await supabase
-    .from("game_state")
+  const { error } = await (supabase
+    .from("game_state") as any)
     .update({ row_numbers: rows, col_numbers: cols, is_locked: true } as GameStateUpdate)
     .eq("id", states[0].id)
 
@@ -81,11 +87,13 @@ export async function generateNumbers() {
 export async function resetGame() {
   const supabase = await createAdminClient()
   
-  const { data: states } = await supabase.from("game_state").select("id").limit(1)
+  const { data } = await supabase.from("game_state").select("id").limit(1)
+  const states = data as { id: string }[] | null
+
   if (!states || states.length === 0) throw new Error("No game state found")
 
-  const { error } = await supabase
-    .from("game_state")
+  const { error } = await (supabase
+    .from("game_state") as any)
     .update({ 
       row_numbers: null, 
       col_numbers: null, 
@@ -104,11 +112,13 @@ export async function resetGame() {
 export async function updateGameState(newState: GameStateUpdate) {
   const supabase = await createAdminClient()
   
-  const { data: states } = await supabase.from("game_state").select("id").limit(1)
+  const { data } = await supabase.from("game_state").select("id").limit(1)
+  const states = data as { id: string }[] | null
+
   if (!states || states.length === 0) throw new Error("No game state found")
 
-  const { error } = await supabase
-    .from("game_state")
+  const { error } = await (supabase
+    .from("game_state") as any)
     .update(newState)
     .eq("id", states[0].id)
 
